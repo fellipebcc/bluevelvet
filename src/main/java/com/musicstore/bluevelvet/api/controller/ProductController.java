@@ -2,39 +2,37 @@ package com.musicstore.bluevelvet.api.controller;
 
 import com.musicstore.bluevelvet.api.request.ProductRequest;
 import com.musicstore.bluevelvet.api.response.ProductResponse;
+import com.musicstore.bluevelvet.domain.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Log4j2
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/products")
 public class ProductController {
+
+    private final ProductService service;
 
     @GetMapping("/{id}")
     @Operation(summary = "Fetch product by id", description = "Fetch a product from the Blue Velvet Music Store")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         log.info("Request received to fetch a product by id {}", id);
 
-        // FIXME: Remove mock
-        return ResponseEntity.ok(assembleProductResponseMock(id));
+        return ResponseEntity.ok(service.findById(id));
     }
 
-    // TODO: Add pageable from spring data
     @GetMapping
     @Operation(summary = "Get all products", description = "Get all products from the Blue Velvet Music Store")
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
+    public ResponseEntity<Page<ProductResponse>> getAllProducts(Pageable pageable) {
         log.info("Request received to fetch all products");
 
-        // FIXME: Remove mock
-        return ResponseEntity.ok(List.of(
-                assembleProductResponseMock(1L),
-                assembleProductResponseMock(2L),
-                assembleProductResponseMock(3L)
-        ));
+        return ResponseEntity.ok(service.findAll(pageable));
     }
 
     @DeleteMapping("/{id}")
@@ -42,7 +40,9 @@ public class ProductController {
     public ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
         log.info("Request received to delete a product by id {}", id);
 
-        return ResponseEntity.ok(null);
+        service.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping
@@ -50,7 +50,7 @@ public class ProductController {
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request){
         log.info("Request received to create a new product. The request is {}", request);
 
-        return ResponseEntity.ok(assembleProductResponseMock(7L));
+        return ResponseEntity.ok(service.createProduct(request));
     }
 
     @PutMapping("/{id}")
@@ -58,16 +58,7 @@ public class ProductController {
     public ResponseEntity<ProductResponse> updateProductById(@PathVariable Long id, @RequestBody ProductRequest request) {
         log.info("Request received to update the product with id {} with the request {}", id, request);
 
-        return ResponseEntity.ok(assembleProductResponseMock(id));
-    }
-
-    // TODO: Remove it after conclude the service and repository
-    private static ProductResponse assembleProductResponseMock(Long id) {
-        return ProductResponse.builder()
-                .id(id)
-                .name("CD player")
-                .brand("Elgin")
-                .build();
+        return ResponseEntity.ok(service.updateProduct(id, request));
     }
 
 }
