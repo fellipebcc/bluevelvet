@@ -8,7 +8,9 @@ import com.musicstore.bluevelvet.infrastructure.entity.BoxDimension;
 import com.musicstore.bluevelvet.infrastructure.entity.Product;
 import com.musicstore.bluevelvet.infrastructure.entity.ProductDetail;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ProductConverter {
 
@@ -50,17 +52,20 @@ public class ProductConverter {
     }
 
     private static List<ProductDetailRequest> convertProductDetailsRequest(Product product) {
-        return product.getProductDetails().stream().map(productDetail -> ProductDetailRequest.builder()
+        return Objects.nonNull(product.getProductDetails()) ?
+                product.getProductDetails().stream().map(productDetail -> ProductDetailRequest.builder()
                 .name(productDetail.getName())
                 .value(productDetail.getValue())
-                .build()).toList();
+                .build()).toList()
+                : new ArrayList<>();
     }
 
     public static List<ProductDetail> convertProductDetail(ProductRequest product) {
-        return product.getDetails().stream().map(productDetail -> ProductDetail.builder()
+        return Objects.nonNull(product.getDetails()) ? product.getDetails().stream().map(productDetail -> ProductDetail.builder()
                 .name(productDetail.getName())
                 .value(productDetail.getValue())
-                .build()).toList();
+                .build()).toList()
+                : new ArrayList<>();
     }
 
     private static ProductDimensionRequest convertBoxDimensionRequest(Product product) {
